@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Akaya Kanadaka";
+  src: url("/fonts/AkayaKanadaka-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Anton";
+  src: url("/fonts/Anton-Regular.ttf") format("truetype");
+}
+
+
+
+.font-akaya {
+  font-family: "Akaya Kanadaka", sans-serif;
+  font-weight: 600;
+  color: #c79c8d;
+}
+
+.footer-title {
+  font-family: "Anton", sans-serif;
+  font-weight: bold;
+}
+
+
+.debug-section {
+    background-color: rgba(255, 0, 0, 0.5);
+    color: white;
+    padding: 20px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  html, body {
+    height: auto;
+    overflow-y: scroll !important;
+  }
+
+   /* === ÚJ, UNIVERZÁLIS PRÉMIUM GOMB STÍLUS === */
+.btn-primary {
+  position: relative;
+  overflow: hidden; /* Szükséges a belső animációhoz */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 2rem; /* px-8 py-3 */
+  background-color: #B76E79; /* brand-rose */
+  color: white;
+  font-family: var(--font-sans); /* Montserrat */
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em; /* tracking-widest */
+  border-radius: 9999px; /* rounded-full */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-out;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* --- ÚJ, FINOMÍTOTT HOVER ANIMÁCIÓ --- */
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0)) 100% 100%;
+  transform: scale(0);
+  transition: transform 0.4s ease-out;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(183, 110, 121, 0.3); /* brand-rose árnyék */
+}
+
+.btn-primary:hover::before {
+  transform: scale(2.5);
+}
