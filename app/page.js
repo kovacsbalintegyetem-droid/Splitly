@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import OnboardingSurvey from "./components/OnboardingSurvey";
+import OnboardingSurvey from "../components/OnboardingSurvey";
 
 // Egy egyszerű komponens, ami a betöltést jelzi
 const LoadingSpinner = () => (

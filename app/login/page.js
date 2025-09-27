@@ -6,6 +6,22 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+// === HELYES VISSZAIRÁNYÍTÁSI URL LÉTREHOZÁSA ===
+// Változatlanul hagyjuk a localhostot fejlesztéshez, de éles környezetben
+// a VERCEL_URL-t fogja használni, ha ott deployolod az appot.
+const getURL = () => {
+  let url =
+    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Először ezt nézi
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Aztán ezt
+    'http://localhost:3000/'; // Végül ezt
+  // Legyen http:// vagy https:// az elején
+  url = url.includes('http') ? url : `https://${url}`;
+  // Biztosan / legyen a végén
+  url = url.charAt(url.length - 1) === '/' ? url : `${url}/`;
+  return url;
+};
+// ===============================================
+
 export default function LoginPage() {
   const supabase = createClientComponentClient();
   const router = useRouter();
@@ -13,9 +29,8 @@ export default function LoginPage() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') {
-        // Sikeres bejelentkezés után átirányítjuk a főoldalra
         router.push('/');
-        router.refresh(); // Frissítjük az oldalt, hogy a middleware lefusson
+        router.refresh();
       }
     });
 
@@ -23,6 +38,9 @@ export default function LoginPage() {
       subscription?.unsubscribe();
     };
   }, [supabase, router]);
+
+  // A JAVÍTÁS ITT TÖRTÉNIK
+  const redirectUrl = getURL() + 'auth/callback';
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -35,8 +53,10 @@ export default function LoginPage() {
         <Auth
           supabaseClient={supabase}
           appearance={{ theme: ThemeSupa }}
-          providers={['google']} // Itt adjuk meg a Google-t
-          redirectTo={`${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`}
+          providers={['google']}
+          // ITT VAN A KULCSFONTOSSÁGÚ VÁLTOZTATÁS!
+          // A teljes URL-t adjuk át a redirectTo-nak.
+          redirectTo={redirectUrl}
           localization={{
             variables: {
               sign_in: {

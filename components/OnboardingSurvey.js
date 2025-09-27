@@ -1,8 +1,9 @@
-// app/components/OnboardingSurvey.js
-"use client"; // Ez a sor jelzi a Next.js-nek, hogy ez egy kliens oldali komponens
+// components/OnboardingSurvey.js
+"use client";
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabaseClient'; // Importáljuk a supabase klienst
+// Töröltük a régi importot, helyette ezt használjuk:
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 // Itt definiáljuk a kérdéseket és a válaszlehetőségeket
 const surveyQuestions = [
@@ -16,7 +17,7 @@ const surveyQuestions = [
     key: 'used_similar_app',
     question: 'Használtál már korábban pénzügyi nyomonkövető appot?',
     options: ['Igen, rendszeresen', 'Próbáltam már', 'Nem, ez az első'],
-    values: [true, true, false] // Az adatbázisban boolean-ként tároljuk
+    values: [true, true, false]
   },
   {
     key: 'primary_goal',
@@ -33,6 +34,9 @@ const surveyQuestions = [
 ];
 
 export default function OnboardingSurvey({ onComplete }) {
+  // A komponenensen belül hozzuk létre a klienst!
+  const supabase = createClientComponentClient();
+  
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -41,18 +45,19 @@ export default function OnboardingSurvey({ onComplete }) {
     const newAnswers = { ...answers, [key]: value };
     setAnswers(newAnswers);
 
-    // Ha még van kérdés, lépjünk a következőre
     if (currentQuestionIndex < surveyQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // Ha ez volt az utolsó kérdés, mentsük az adatokat
       setIsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user) {
+        // Fontos: Az adatbázis frissítésnek az 'update' helyett 'upsert'-nek kell lennie,
+        // hogy új profil létrehozásakor is működjön.
+        const finalAnswers = { ...newAnswers, id: user.id, updated_at: new Date() };
         const { error } = await supabase
           .from('profiles')
-          .update(newAnswers)
+          .upsert(finalAnswers)
           .eq('id', user.id);
 
         if (error) {
@@ -60,7 +65,7 @@ export default function OnboardingSurvey({ onComplete }) {
           alert('Hiba történt a mentés során.');
         } else {
           console.log('Sikeres mentés!', newAnswers);
-          if (onComplete) onComplete(); // Jelezzük a szülő komponensnek, hogy végeztünk
+          if (onComplete) onComplete();
         }
       }
       setIsLoading(false);
@@ -73,7 +78,6 @@ export default function OnboardingSurvey({ onComplete }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
       <div className="w-full max-w-md mx-auto">
-        {/* Progress Bar */}
         <div className="w-full bg-gray-200 rounded-full h-2 mb-8">
           <div
             className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-in-out"
